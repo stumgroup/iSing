@@ -1,0 +1,3 @@
+import Link from "next/link";
+import { Shell } from "@/components/Shell";
+export default function Page() { return <Shell><div className="p-6 md:p-10"><div className="mx-auto max-w-6xl"><p className="font-bold uppercase tracking-widest text-red-600">iSing</p><h1 className="mt-2 text-4xl font-black">Pricing</h1><p className="mt-3 max-w-2xl text-zinc-600">Simple pay-per-asset pricing.</p><div className="mt-10 grid gap-4 md:grid-cols-3"><Link href="/create" className="rounded-2xl border bg-white p-5 font-bold hover:border-red-400">Create Audio · $0.50</Link><Link href="/create" className="rounded-2xl border bg-white p-5 font-bold hover:border-red-400">Create Video · $1.00</Link></div></div></div></Shell> }
