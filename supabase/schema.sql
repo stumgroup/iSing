@@ -227,3 +227,46 @@ alter table public.songs add column if not exists preview_ready boolean not null
 alter table public.songs add column if not exists audio_unlocked boolean not null default false;
 alter table public.songs add column if not exists video_unlocked boolean not null default false;
 create unique index if not exists songs_share_token_idx on public.songs(share_token);
+
+-- Public analytics: aggregate only; never store names, phone numbers, or message contents.
+create table if not exists public.analytics_events (
+  id bigint generated always as identity primary key,
+  event text not null check (event in ('landing_view','create_started','prompt_submitted','preview_played','share_clicked','pricing_viewed')),
+  path text,
+  country text,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+create index if not exists analytics_events_event_idx on public.analytics_events(event, created_at desc);
+create index if not exists analytics_events_created_idx on public.analytics_events(created_at desc);
+alter table public.analytics_events enable row level security;
+
+-- No public SELECT/UPDATE/DELETE policy: analytics reads are server-side only with the service role.
+
+-- iSing AI commercial pricing controls. USD remains the master/control price.
+create table if not exists public.currency_settings (
+  id uuid primary key default gen_random_uuid(),
+  currency_code text unique not null,
+  currency_name text not null,
+  currency_symbol text,
+  market_rate numeric(18,6),
+  ising_rate numeric(18,6) not null,
+  use_custom_rate boolean not null default true,
+  rounding_increment numeric(18,6) not null default 5,
+  rounding_direction text not null default 'up' check (rounding_direction in ('up','nearest','down')),
+  is_active boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.pricing_products (
+  id uuid primary key default gen_random_uuid(),
+  product_code text unique not null,
+  name text not null,
+  base_price_usd numeric(12,4) not null check (base_price_usd >= 0),
+  is_active boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+insert into public.pricing_products (product_code,name,base_price_usd)
+values ('audio','Full Audio',0.50),('video','Full Video',1.00)
+on conflict (product_code) do update set name=excluded.name, base_price_usd=excluded.base_price_usd;

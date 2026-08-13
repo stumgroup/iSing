@@ -16,3 +16,9 @@ The neural models themselves require properly licensed training data and GPU inf
 
 ## Start
 `npm start`
+
+## iSing AI SaaS finish
+The web application now uses the `/create` studio as its visual design system across the dashboard, library, voices, videos, payments, pricing, WhatsApp, account and admin areas. The UI uses a consistent SaaS shell, responsive sidebar, command-style topbar, cards, tables, empty states, pricing controls and production-oriented workflows.
+
+## Commercial pricing controls
+USD is the control price: audio USD 0.50 and video USD 1.00. Local customer prices are calculated using the saved iSing exchange rate for the detected/selected currency and rounded according to the currency setting. Administrators can adjust iSing rates in `/admin/pricing`. Run `supabase/pricing.sql` in Supabase SQL Editor before enabling database-backed pricing controls.

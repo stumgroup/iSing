@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowUpRight, Check, Music2, Mic2, MessageCircle, Video, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowUpRight, Check, Music2, Mic2, MessageCircle, Video, Sparkles, Globe2, Play, Users } from "lucide-react";
 
 const features = [
   { icon: Music2, title: "Music creation", text: "Describe the song you hear and iSing AI composes an original preview in-house." },
@@ -8,7 +11,21 @@ const features = [
   { icon: Video, title: "Music video", text: "Turn your finished song into an AI-inspired visual experience." },
 ];
 
+type Analytics = { songs: number; videos: number; users: number; countries: number; previews: number; generated: number; shared: number; live: boolean };
+
+const initialAnalytics: Analytics = { songs: 0, videos: 0, users: 0, countries: 0, previews: 0, generated: 0, shared: 0, live: false };
+
+function compact(n: number) {
+  return new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(n);
+}
+
 export default function Home() {
+  const [analytics, setAnalytics] = useState<Analytics>(initialAnalytics);
+
+  useEffect(() => {
+    fetch("/api/analytics", { cache: "no-store" }).then((r) => r.json()).then(setAnalytics).catch(() => undefined);
+    fetch("/api/analytics", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ event: "landing_view", path: window.location.pathname }) }).catch(() => undefined);
+  }, []);
   return (
     <main className="workspace-shell min-h-screen">
       <header className="workspace-header">
@@ -68,6 +85,26 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        <section className="mt-20 rounded-[32px] border border-zinc-200 bg-white p-6 shadow-sm lg:p-8">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-[#ff5a36]"><span className="h-2 w-2 animate-pulse rounded-full bg-[#ff5a36]" /> Live platform</div>
+              <h2 className="mt-2 text-3xl font-black tracking-tight">iSing AI is creating around the world.</h2>
+              <p className="mt-2 text-sm text-zinc-500">Real aggregated platform activity. No private user information is displayed.</p>
+            </div>
+            {analytics.live && <span className="rounded-full bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700">LIVE DATA</span>}
+          </div>
+          <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              [Music2, compact(analytics.songs), "Songs created"],
+              [Video, compact(analytics.videos), "Videos created"],
+              [Users, compact(analytics.users), "Creators"],
+              [Globe2, compact(analytics.countries), "Countries"],
+              [Play, compact(analytics.previews), "Previews ready"],
+            ].map(([Icon, value, label]) => { const I = Icon as typeof Music2; return <div key={String(label)} className="rounded-2xl bg-[#f7f7f5] p-5"><I size={17} /><div className="mt-4 text-2xl font-black">{value}{analytics.live && String(label) !== "Countries" ? "+" : ""}</div><div className="mt-1 text-xs font-bold text-zinc-500">{label}</div></div>; })}
+          </div>
+        </section>
 
         <div className="mt-20 grid gap-4 md:grid-cols-4">
           {features.map(({icon: Icon, title, text}) => (
