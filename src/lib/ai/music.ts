@@ -1,23 +1,13 @@
-import { GenerationResult, MusicRequest } from "./types";
+import { MusicRequest, GenerationResult } from "./types";
 
 export async function generateMusic(request: MusicRequest): Promise<GenerationResult> {
-  const engineUrl = process.env.ISING_ENGINE_URL;
-  const engineKey = process.env.ISING_ENGINE_API_KEY;
-
-  if (!engineUrl) throw new Error("ISING_ENGINE_URL is not configured.");
-
-  const response = await fetch(`${engineUrl.replace(/\/$/, "")}/v1/music`, {
+  const response = await fetch(new URL("/api/generate/inhouse", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(engineKey ? { Authorization: `Bearer ${engineKey}` } : {})
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(request),
-    cache: "no-store"
+    cache: "no-store",
   });
-
   const data = await response.json();
-  if (!response.ok) throw new Error(data?.detail || data?.error || "iSing AI engine rejected the music request.");
-
+  if (!response.ok) throw new Error(data?.message || "iSing in-house engine failed.");
   return data;
 }

@@ -2,8 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "iSing — AI Music Through WhatsApp",
-  description: "Create original music, voices and AI-inspired videos with iSing."
+  title: "iSing AI — Create Music From an Idea",
+  description: "iSing AI turns your ideas into original music with an in-house creative engine.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -1,18 +1,41 @@
 import { NextResponse } from "next/server";
+import { pruneTasks, tasks } from "@/lib/ai/inhouse-store";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const taskId = url.searchParams.get("taskId");
-  if (!taskId) return NextResponse.json({ error: "taskId is required" }, { status: 400 });
+  pruneTasks();
 
-  const engineUrl = process.env.ISING_ENGINE_URL;
-  const engineKey = process.env.ISING_ENGINE_API_KEY;
-  if (!engineUrl) return NextResponse.json({ error: "ISING_ENGINE_URL is not configured." }, { status: 500 });
+  const taskId = new URL(request.url).searchParams.get("taskId");
 
-  const response = await fetch(`${engineUrl.replace(/\/$/, "")}/v1/tasks/${encodeURIComponent(taskId)}`, {
-    headers: engineKey ? { Authorization: `Bearer ${engineKey}` } : {},
-    cache: "no-store"
+  if (!taskId) {
+    return NextResponse.json({ error: "taskId is required" }, { status: 400 });
+  }
+
+  const task = tasks.get(taskId);
+
+  if (!task) {
+    return NextResponse.json(
+      {
+        status: "failed",
+        error: "iSing task not found. Start a new generation.",
+      },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json({
+    status: task.status,
+    progress: task.progress,
+    taskId: task.id,
+    audioUrl:
+      task.status === "completed"
+        ? `/api/generate/audio?taskId=${encodeURIComponent(task.id)}`
+        : undefined,
+    error:
+      task.status === "failed"
+        ? "iSing AI could not complete the generation."
+        : undefined,
   });
-  const data = await response.json();
-  return NextResponse.json(data, { status: response.status });
 }

@@ -7,21 +7,9 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-
-    if (!body?.prompt?.trim()) {
-      return NextResponse.json(
-        { ok: false, message: "Describe your song first." },
-        { status: 400 }
-      );
-    }
-
     const result = await createInHouseTask(body);
-
-    return NextResponse.json(result, {
-      status: result.ok ? 200 : 500,
-    });
+    return NextResponse.json(result, { status: result.ok ? 200 : 400 });
   } catch (error) {
-    console.error("iSing AI generation error:", error);
     return NextResponse.json(
       {
         ok: false,
