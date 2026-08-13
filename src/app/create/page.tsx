@@ -114,7 +114,7 @@ export default function CreatePage() {
             ["◌", "Voice", false],
             ["▣", "Video", false],
           ].map(([icon, label, active]) => (
-            <div key={label} className={`side-item ${active ? "side-item-active" : ""}`}>
+            <div key={String(label)} className={`side-item ${active ? "side-item-active" : ""}`}>
               <span>{icon}</span>{label}
             </div>
           ))}
