@@ -3,9 +3,20 @@ export async function generateVideo(input: {
   audioUrl: string;
   prompt?: string;
 }) {
-  const provider = process.env.VIDEO_PROVIDER;
-  const apiKey = process.env.VIDEO_PROVIDER_API_KEY;
+  const engineUrl = process.env.ISING_ENGINE_URL;
+  const engineKey = process.env.ISING_ENGINE_API_KEY;
+  if (!engineUrl) throw new Error("ISING_ENGINE_URL is not configured.");
 
-  if (!provider || !apiKey) return { providerJobId: `demo_video_${Date.now()}`, status: "queued" as const };
-  throw new Error(`Video provider "${provider}" is configured but its adapter is not implemented yet.`);
+  const response = await fetch(`${engineUrl.replace(/\/$/, "")}/v1/video`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(engineKey ? { Authorization: `Bearer ${engineKey}` } : {})
+    },
+    body: JSON.stringify(input),
+    cache: "no-store"
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data?.detail || data?.error || "iSing AI engine rejected the video request.");
+  return data;
 }
