@@ -19,9 +19,9 @@ services:
         sync: false
       - key: WHATSAPP_VERIFY_TOKEN
         sync: false
-      - key: MUSIC_PROVIDER
+      - key: ISING_ENGINE_URL
         sync: false
-      - key: MUSIC_PROVIDER_API_KEY
+      - key: ISING_ENGINE_API_KEY
         sync: false
       - key: VOICE_PROVIDER
         sync: false

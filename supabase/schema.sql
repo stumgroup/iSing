@@ -217,3 +217,13 @@ insert into storage.buckets (id, name, public) values
 ('voices','voices',false),
 ('videos','videos',false)
 on conflict (id) do nothing;
+
+-- iSing AI engine metadata
+alter table public.songs add column if not exists share_token text;
+alter table public.songs add column if not exists play_count bigint not null default 0;
+alter table public.songs add column if not exists share_count bigint not null default 0;
+alter table public.songs add column if not exists download_count bigint not null default 0;
+alter table public.songs add column if not exists preview_ready boolean not null default false;
+alter table public.songs add column if not exists audio_unlocked boolean not null default false;
+alter table public.songs add column if not exists video_unlocked boolean not null default false;
+create unique index if not exists songs_share_token_idx on public.songs(share_token);
